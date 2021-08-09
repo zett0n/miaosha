@@ -99,7 +99,7 @@
                     <!--运行移动生成文件-->
                     <verbose>true</verbose>
                     <!--运行自动覆盖文件-->
-                    <overwrite>true</overwrite>
+                    <overwrite>false</overwrite>
                     <!--mybatis的代码生成器的配置文件-->
                     <configurationFile>src/main/resources/mybatis-generator.xml</configurationFile>
                     <!--将当前pom的依赖项添加到生成器的类路径中-->

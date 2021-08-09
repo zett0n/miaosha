@@ -33,7 +33,7 @@
         from user_info
         where id = #{id,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" parameterType="cn.edu.zjut.entity.UserInfo">
+    <insert id="insert" parameterType="cn.edu.zjut.entity.UserInfo" keyProperty="id" useGeneratedKeys="true">
         insert into user_info (id, name, gender,
                                age, telephone, register_mode,
                                third_party_id)

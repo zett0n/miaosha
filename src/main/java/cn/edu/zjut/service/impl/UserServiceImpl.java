@@ -33,21 +33,18 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ValidatorImpl validator;
 
-    private UserModel convertFromEntity(UserInfo userInfo, UserPassword userPassword) {
-        if (userInfo == null) {
+    private UserModel convertFromUser(UserInfo userInfo, UserPassword userPassword) {
+        if (userInfo == null || userPassword == null) {
             return null;
         }
-
         UserModel userModel = new UserModel();
         BeanUtils.copyProperties(userInfo, userModel);
+        userModel.setEncryptedPassword(userPassword.getEncryptPassword());
 
-        if (userPassword != null) {
-            userModel.setEncryptedPassword(userPassword.getEncryptPassword());
-        }
         return userModel;
     }
 
-    private UserInfo convertFromModel(UserModel userModel) {
+    private UserInfo convertInfoFromModel(UserModel userModel) {
         if (userModel == null) {
             return null;
         }
@@ -73,7 +70,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         UserPassword userPassword = this.userPasswordMapper.selectByUserId(id);
-        return convertFromEntity(userInfo, userPassword);
+        return convertFromUser(userInfo, userPassword);
     }
 
     @Override
@@ -89,7 +86,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, result.getErrMsg());
         }
 
-        UserInfo userInfo = convertFromModel(userModel);
+        UserInfo userInfo = convertInfoFromModel(userModel);
         try {
             this.userInfoMapper.insertSelective(userInfo);
         } catch (DuplicateKeyException e) {
@@ -110,7 +107,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
         }
         UserPassword userPassword = this.userPasswordMapper.selectByUserId(userInfo.getId());
-        UserModel userModel = convertFromEntity(userInfo, userPassword);
+        UserModel userModel = convertFromUser(userInfo, userPassword);
 
         if (!StringUtils.equals(encryptedPassword, userModel.getEncryptedPassword())) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
