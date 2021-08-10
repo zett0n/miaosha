@@ -16,7 +16,9 @@ import cn.edu.zjut.entity.ItemStock;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.service.ItemService;
+import cn.edu.zjut.service.PromoService;
 import cn.edu.zjut.service.model.ItemModel;
+import cn.edu.zjut.service.model.PromoModel;
 import cn.edu.zjut.validater.ValidationResult;
 import cn.edu.zjut.validater.ValidatorImpl;
 
@@ -35,6 +37,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private ItemStockMapper itemStockMapper;
+
+    @Autowired
+    private PromoService promoService;
 
     private ItemInfo convertInfoFromModel(ItemModel itemModel) {
         if (itemModel == null) {
@@ -111,6 +116,13 @@ public class ItemServiceImpl implements ItemService {
         }
         ItemStock itemStock = this.itemStockMapper.selectByItemId(id);
         ItemModel itemModel = convertModelFromItem(itemInfo, itemStock);
+
+        // 获取秒杀相关信息
+        PromoModel promoModel = this.promoService.getPromoByItemId(itemModel.getId());
+        // TODO 硬编码
+        if (promoModel != null && promoModel.getStatus().intValue() != 3) {
+            itemModel.setPromoModel(promoModel);
+        }
         return itemModel;
     }
 

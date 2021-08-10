@@ -14,15 +14,24 @@ public class OrderModel {
 
     private Integer itemId;
 
-    // private Integer promoId;
-
     private Integer amount;
 
-    // 购买时商品的单价
+    // 购买时商品的单价，若promoId非空则表示秒杀商品的单价
     private BigDecimal itemPrice;
 
-    // 总金额
+    // 总金额，若promoId非空则表示秒杀商品的总金额
     private BigDecimal orderPrice;
+
+    // 若非空则表示以秒杀商品方式下单
+    private Integer promoId;
+
+    public Integer getPromoId() {
+        return this.promoId;
+    }
+
+    public void setPromoId(Integer promoId) {
+        this.promoId = promoId;
+    }
 
     public String getId() {
         return this.id;

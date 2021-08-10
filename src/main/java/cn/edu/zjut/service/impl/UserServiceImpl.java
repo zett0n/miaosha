@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ValidatorImpl validator;
 
-    private UserModel convertFromUser(UserInfo userInfo, UserPassword userPassword) {
+    private UserModel convertModelFromUser(UserInfo userInfo, UserPassword userPassword) {
         if (userInfo == null || userPassword == null) {
             return null;
         }
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         UserPassword userPassword = this.userPasswordMapper.selectByUserId(id);
-        return convertFromUser(userInfo, userPassword);
+        return convertModelFromUser(userInfo, userPassword);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
         }
         UserPassword userPassword = this.userPasswordMapper.selectByUserId(userInfo.getId());
-        UserModel userModel = convertFromUser(userInfo, userPassword);
+        UserModel userModel = convertModelFromUser(userInfo, userPassword);
 
         if (!StringUtils.equals(encryptedPassword, userModel.getEncryptedPassword())) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);

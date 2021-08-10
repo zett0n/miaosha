@@ -106,7 +106,12 @@
         <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
         <!--</table>-->
 
-        <table schema="" tableName="sequence_info" domainObjectName="SequenceInfo"
+        <!--<table schema="" tableName="sequence_info" domainObjectName="SequenceInfo"-->
+        <!--       enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
+        <!--</table>-->
+
+        <table schema="" tableName="promo" domainObjectName="PromoInfo"
                enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
                enableUpdateByExample="false" selectByExampleQueryId="false">
         </table>

@@ -32,7 +32,7 @@ public class ItemModel {
     private String imgUrl;
 
     // 使用聚合模型，如果该对象不为空，则表示该商品有未结束的秒杀活动
-    // private PromoModel promoModel;
+    private PromoModel promoModel;
 
     public Integer getId() {
         return this.id;
@@ -90,11 +90,11 @@ public class ItemModel {
         this.imgUrl = imgUrl;
     }
 
-    // public PromoModel getPromoModel() {
-    // return promoModel;
-    // }
-    //
-    // public void setPromoModel(PromoModel promoModel) {
-    // this.promoModel = promoModel;
-    // }
+    public PromoModel getPromoModel() {
+        return this.promoModel;
+    }
+
+    public void setPromoModel(PromoModel promoModel) {
+        this.promoModel = promoModel;
+    }
 }

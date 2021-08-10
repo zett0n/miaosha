@@ -13,8 +13,18 @@ public class OrderInfo {
 
     private Double orderPrice;
 
+    private Integer promoId;
+
+    public Integer getPromoId() {
+        return this.promoId;
+    }
+
+    public void setPromoId(Integer promoId) {
+        this.promoId = promoId;
+    }
+
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -22,7 +32,7 @@ public class OrderInfo {
     }
 
     public Integer getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public void setUserId(Integer userId) {
@@ -30,7 +40,7 @@ public class OrderInfo {
     }
 
     public Integer getItemId() {
-        return itemId;
+        return this.itemId;
     }
 
     public void setItemId(Integer itemId) {
@@ -38,7 +48,7 @@ public class OrderInfo {
     }
 
     public Integer getAmount() {
-        return amount;
+        return this.amount;
     }
 
     public void setAmount(Integer amount) {
@@ -46,7 +56,7 @@ public class OrderInfo {
     }
 
     public Double getItemPrice() {
-        return itemPrice;
+        return this.itemPrice;
     }
 
     public void setItemPrice(Double itemPrice) {
@@ -54,7 +64,7 @@ public class OrderInfo {
     }
 
     public Double getOrderPrice() {
-        return orderPrice;
+        return this.orderPrice;
     }
 
     public void setOrderPrice(Double orderPrice) {

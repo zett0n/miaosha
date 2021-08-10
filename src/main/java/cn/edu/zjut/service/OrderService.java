@@ -8,5 +8,5 @@ import cn.edu.zjut.service.model.OrderModel;
  * @date 2021/8/9 21:30
  */
 public interface OrderService {
-    OrderModel createOrder(Integer userId, Integer itemId, Integer amount) throws BusinessException;
+    OrderModel createOrder(Integer userId, Integer itemId, Integer amount, Integer promoId) throws BusinessException;
 }
