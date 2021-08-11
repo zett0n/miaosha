@@ -27,7 +27,7 @@ import cn.edu.zjut.service.model.UserModel;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {" * "}, allowedHeaders = "*")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 public class UserController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     @Autowired

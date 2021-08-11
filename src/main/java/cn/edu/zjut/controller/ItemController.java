@@ -21,7 +21,7 @@ import cn.edu.zjut.service.model.ItemModel;
  */
 @RestController
 @RequestMapping("/item")
-@CrossOrigin(origins = {" * "}, allowedHeaders = "*")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 public class ItemController extends BaseController {
 
     @Autowired

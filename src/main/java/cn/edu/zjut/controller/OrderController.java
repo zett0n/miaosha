@@ -17,7 +17,7 @@ import cn.edu.zjut.service.model.UserModel;
  */
 @RestController
 @RequestMapping("/order")
-@CrossOrigin(origins = {" * "}, allowedHeaders = "*")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 public class OrderController extends BaseController {
     @Autowired
     private OrderService orderService;
