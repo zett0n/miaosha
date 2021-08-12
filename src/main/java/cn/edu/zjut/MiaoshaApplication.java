@@ -6,17 +6,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
+// jar包部署（默认）
+// @SpringBootApplication
+// @MapperScan("cn.edu.zjut.dao")
+// public class MiaoshaApplication {
+// public static void main(String[] args) {
+// SpringApplication.run(MiaoshaApplication.class, args);
+// }
+// }
+
+// 指定war部署[step4]继承 SpringBootServletInitializer
 @SpringBootApplication
 @MapperScan("cn.edu.zjut.dao")
-// war包部署需要继承SpringBootServletInitializer
 public class MiaoshaApplication extends SpringBootServletInitializer {
-    // public class MiaoshaApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MiaoshaApplication.class, args);
     }
 
-    // [war包部署]配置入口类是谁
+    // 指定war部署[step5]配置入口类是谁
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
         return builder.sources(MiaoshaApplication.class);
