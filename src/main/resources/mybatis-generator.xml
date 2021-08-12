@@ -111,10 +111,10 @@
         <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
         <!--</table>-->
 
-        <table schema="" tableName="promo" domainObjectName="PromoInfo"
-               enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-               enableUpdateByExample="false" selectByExampleQueryId="false">
-        </table>
+        <!--<table schema="" tableName="promo" domainObjectName="PromoInfo"-->
+        <!--       enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
+        <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
+        <!--</table>-->
 
     </context>
 </generatorConfiguration>
