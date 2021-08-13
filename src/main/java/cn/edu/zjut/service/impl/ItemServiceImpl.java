@@ -101,8 +101,7 @@ public class ItemServiceImpl implements ItemService {
         // stream api
         List<ItemModel> itemModelList = itemInfoList.stream().map(itemInfo -> {
             ItemStock itemStock = this.itemStockMapper.selectByItemId(itemInfo.getId());
-            ItemModel itemModel = convertModelFromItem(itemInfo, itemStock);
-            return itemModel;
+            return convertModelFromItem(itemInfo, itemStock);
         }).collect(Collectors.toList());
 
         return itemModelList;
@@ -120,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
         // 获取秒杀相关信息
         PromoModel promoModel = this.promoService.getPromoByItemId(itemModel.getId());
         // TODO 硬编码
-        if (promoModel != null && promoModel.getStatus().intValue() != 3) {
+        if (promoModel != null && promoModel.getStatus() != 3) {
             itemModel.setPromoModel(promoModel);
         }
         return itemModel;

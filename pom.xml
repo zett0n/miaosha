@@ -14,7 +14,7 @@
     <name>miaosha</name>
 
     <!--指定war部署[step1]-->
-    <packaging>war</packaging>
+    <!--<packaging>war</packaging>-->
 
     <description>miaosha</description>
     <properties>
@@ -22,18 +22,18 @@
     </properties>
     <dependencies>
         <!--指定war部署[step2a]去掉内嵌tomcat-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <!--provided表示当前idea环境可用，不参与打包-->
-            <scope>provided</scope>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.springframework.boot</groupId>-->
+        <!--    <artifactId>spring-boot-starter-tomcat</artifactId>-->
+        <!--    &lt;!&ndash;provided表示当前idea环境可用，不参与打包&ndash;&gt;-->
+        <!--    <scope>provided</scope>-->
+        <!--</dependency>-->
         <!--指定war部署[step2b]去掉使用内嵌tomcat解析jsp-->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-            <scope>provided</scope>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.apache.tomcat.embed</groupId>-->
+        <!--    <artifactId>tomcat-embed-jasper</artifactId>-->
+        <!--    <scope>provided</scope>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -97,7 +97,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <!--指定war部署[step3]指定入口类-->
-                    <mainClass>cn.edu.zjut.MiaoshaApplication</mainClass>
+                    <!--<mainClass>cn.edu.zjut.MiaoshaApplication</mainClass>-->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
