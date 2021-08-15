@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+    <script src="./gethost.js"></script>
 </head>
 
 <body class="login">
@@ -89,7 +90,7 @@
         $("#createorder").on("click", function () {
             $.ajax({
                 type: "POST",
-                url: "http://localhost:8080/order/create",
+                url: "http://" + g_host + "/order/create",
                 data: {
                     "itemId": global_itemVO.id,
                     "amount": 1,
@@ -117,7 +118,7 @@
 
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/item/get",
+            url: "http://" + g_host + "/item/get",
             data: {
                 "id": getParam("id"),
             },
