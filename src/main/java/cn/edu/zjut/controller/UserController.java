@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class UserController extends BaseController {
     private UserService userService;
 
     @Autowired
-    private HttpServletRequest httpServletRequest;
+    private HttpSession httpSession;
 
     private UserVO convertFromModel(UserModel userModel) {
         if (userModel == null) {
@@ -71,7 +71,7 @@ public class UserController extends BaseController {
         String otpCode = String.valueOf(randomInt);
 
         // 将验证码与用户手机号相关联
-        this.httpServletRequest.getSession().setAttribute(telephone, otpCode);
+        this.httpSession.setAttribute(telephone, otpCode);
 
         log.debug("telephone: {}, otpCode: {}", telephone, otpCode);
         return CommonReturnType.create(null);
@@ -85,7 +85,7 @@ public class UserController extends BaseController {
         @RequestParam(name = "password") String password)
         throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // 验证手机号和对应的otpCode相符合
-        String inSessionOtpCode = (String)this.httpServletRequest.getSession().getAttribute(telephone);
+        String inSessionOtpCode = (String)this.httpSession.getAttribute(telephone);
         // 工具类的equals已经进行了判空的处理
         if (!StringUtils.equals(otpCode, inSessionOtpCode)) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "短信验证码不符合！");
@@ -116,8 +116,8 @@ public class UserController extends BaseController {
         UserModel userModel = this.userService.validateLogin(telephone, EncodeByMd5(password));
 
         // 没有任何异常，则加入到用户登录成功的session内。这里不用分布式的处理方式（假设单点登录）
-        this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
-        this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+        this.httpSession.setAttribute("IS_LOGIN", true);
+        this.httpSession.setAttribute("LOGIN_USER", userModel);
 
         return CommonReturnType.create(null);
     }

@@ -1,5 +1,7 @@
 package cn.edu.zjut.service.model;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -9,7 +11,7 @@ import javax.validation.constraints.NotNull;
  * @author zett0n
  * @date 2021/8/8 15:28
  */
-public class UserModel {
+public class UserModel implements Serializable {
     private Integer id;
 
     @NotBlank(message = "用户名不能为空")

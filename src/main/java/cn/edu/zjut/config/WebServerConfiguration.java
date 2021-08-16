@@ -6,14 +6,14 @@ import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author zett0n
  * @date 2021/8/15 14:30
  */
 // 当Spring容器内没有TomcatEmbeddedServletContainerFactory这个bean时，会把此bean加载进spring
-@Component
+@Configuration
 public class WebServerConfiguration implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     @Override
     public void customize(ConfigurableWebServerFactory factory) {

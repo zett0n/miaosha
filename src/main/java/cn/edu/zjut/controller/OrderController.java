@@ -1,6 +1,6 @@
 package cn.edu.zjut.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class OrderController extends BaseController {
     private OrderService orderService;
 
     @Autowired
-    private HttpServletRequest httpServletRequest;
+    private HttpSession httpSession;
 
     // 封装下单请求
     @PostMapping("/create")
@@ -31,13 +31,13 @@ public class OrderController extends BaseController {
         @RequestParam(name = "promoId", required = false) Integer promoId,
         @RequestParam(name = "amount") Integer amount) throws BusinessException {
 
-        Boolean isLogin = (Boolean)this.httpServletRequest.getSession().getAttribute("IS_LOGIN");
+        Boolean isLogin = (Boolean)this.httpSession.getAttribute("IS_LOGIN");
         if (isLogin == null || !isLogin) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
         }
 
         // 获取用户的登录信息
-        UserModel userModel = (UserModel)this.httpServletRequest.getSession().getAttribute("LOGIN_USER");
+        UserModel userModel = (UserModel)this.httpSession.getAttribute("LOGIN_USER");
         this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
 
         return CommonReturnType.create(null);
