@@ -3,6 +3,8 @@ package cn.edu.zjut.controller;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpSession;
 
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.druid.util.StringUtils;
@@ -30,11 +33,15 @@ import cn.edu.zjut.service.model.UserModel;
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 public class UserController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private HttpSession httpSession;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     private UserVO convertFromModel(UserModel userModel) {
         if (userModel == null) {
@@ -115,10 +122,20 @@ public class UserController extends BaseController {
 
         UserModel userModel = this.userService.validateLogin(telephone, EncodeByMd5(password));
 
-        // 没有任何异常，则加入到用户登录成功的session内。这里不用分布式的处理方式（假设单点登录）
-        this.httpSession.setAttribute("IS_LOGIN", true);
-        this.httpSession.setAttribute("LOGIN_USER", userModel);
+        // 若用户登录成功后将对应的登录信息和凭证存入redis
+        // 用UUID生成token
+        String uuidToken = UUID.randomUUID().toString();
+        uuidToken = uuidToken.replace("-", "");
 
-        return CommonReturnType.create(null);
+        // 建立token和用户登录状态的关系
+        this.redisTemplate.opsForValue().set(uuidToken, userModel);
+        this.redisTemplate.expire(uuidToken, 1, TimeUnit.HOURS);
+
+        // 基于session的登录
+        // this.httpSession.setAttribute("IS_LOGIN", true);
+        // this.httpSession.setAttribute("LOGIN_USER", userModel);
+
+        // 下发了token
+        return CommonReturnType.create(uuidToken);
     }
 }

@@ -2,7 +2,9 @@ package cn.edu.zjut.controller;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import cn.edu.zjut.error.BusinessException;
@@ -25,21 +27,31 @@ public class OrderController extends BaseController {
     @Autowired
     private HttpSession httpSession;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     // 封装下单请求
     @PostMapping("/create")
     public CommonReturnType createOrder(@RequestParam(name = "itemId") Integer itemId,
         @RequestParam(name = "promoId", required = false) Integer promoId,
-        @RequestParam(name = "amount") Integer amount) throws BusinessException {
-
-        Boolean isLogin = (Boolean)this.httpSession.getAttribute("IS_LOGIN");
-        if (isLogin == null || !isLogin) {
-            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
-        }
+        @RequestParam(name = "amount") Integer amount, @RequestParam(name = "token") String token)
+        throws BusinessException {
 
         // 获取用户的登录信息
-        UserModel userModel = (UserModel)this.httpSession.getAttribute("LOGIN_USER");
-        this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
+        // 基于session
+        // Boolean isLogin = (Boolean)this.httpSession.getAttribute("IS_LOGIN");
+        // if (isLogin == null || !isLogin) {
+        // throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
+        // }
+        // UserModel userModel = (UserModel)this.httpSession.getAttribute("LOGIN_USER");
 
+        // 基于token
+        UserModel userModel;
+        if (StringUtils.isEmpty(token)
+            || null == (userModel = (UserModel)this.redisTemplate.opsForValue().get(token))) {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
+        }
+        this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
         return CommonReturnType.create(null);
     }
 }
