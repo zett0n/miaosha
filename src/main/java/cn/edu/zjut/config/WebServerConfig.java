@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  */
 // 当Spring容器内没有TomcatEmbeddedServletContainerFactory这个bean时，会把此bean加载进spring
 @Configuration
-public class WebServerConfiguration implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+public class WebServerConfig implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     @Override
     public void customize(ConfigurableWebServerFactory factory) {
         // 使用对应工厂类提供给我们的接口，定制化Tomcat connector

@@ -1,5 +1,8 @@
 package cn.edu.zjut.entity;
 
+import lombok.Data;
+
+@Data
 public class UserPassword {
     private Integer id;
 
@@ -7,27 +10,7 @@ public class UserPassword {
 
     private Integer userId;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getEncryptPassword() {
-        return encryptPassword;
-    }
-
     public void setEncryptPassword(String encryptPassword) {
         this.encryptPassword = encryptPassword == null ? null : encryptPassword.trim();
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 }

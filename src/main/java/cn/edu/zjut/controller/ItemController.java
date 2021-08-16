@@ -2,11 +2,13 @@ package cn.edu.zjut.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import cn.edu.zjut.controller.vo.ItemVO;
@@ -26,6 +28,9 @@ public class ItemController extends BaseController {
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping("/create")
     public CommonReturnType createItem(@RequestParam(name = "title") String title,
@@ -48,7 +53,13 @@ public class ItemController extends BaseController {
 
     @GetMapping("/get")
     public CommonReturnType getItem(@RequestParam(name = "id") Integer id) {
-        ItemModel itemModel = this.itemService.getItemById(id);
+        // 查询redis缓存
+        ItemModel itemModel = (ItemModel)this.redisTemplate.opsForValue().get("item_" + id);
+        if (itemModel == null) {
+            itemModel = this.itemService.getItemById(id);
+            this.redisTemplate.opsForValue().set("item_" + id, itemModel);
+            this.redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
+        }
         ItemVO itemVO = convertVOFromModel(itemModel);
         return CommonReturnType.create(itemVO);
     }

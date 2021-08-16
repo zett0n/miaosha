@@ -1,5 +1,8 @@
 package cn.edu.zjut.entity;
 
+import lombok.Data;
+
+@Data
 public class SequenceInfo {
     private String name;
 
@@ -7,27 +10,7 @@ public class SequenceInfo {
 
     private Integer step;
 
-    public String getName() {
-        return name;
-    }
-
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
-    }
-
-    public Integer getCurrentValue() {
-        return currentValue;
-    }
-
-    public void setCurrentValue(Integer currentValue) {
-        this.currentValue = currentValue;
-    }
-
-    public Integer getStep() {
-        return step;
-    }
-
-    public void setStep(Integer step) {
-        this.step = step;
     }
 }

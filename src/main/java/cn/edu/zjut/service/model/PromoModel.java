@@ -1,14 +1,18 @@
 package cn.edu.zjut.service.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import org.joda.time.DateTime;
+
+import lombok.Data;
 
 /**
  * @author zett0n
  * @date 2021/8/10 14:41
  */
-public class PromoModel {
+@Data
+public class PromoModel implements Serializable {
     private Integer id;
 
     // 秒杀活动名称
@@ -28,60 +32,4 @@ public class PromoModel {
 
     // 秒杀活动状态，1是还未开始，2是进行中，3是已结束
     private Integer status;
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getPromoName() {
-        return this.promoName;
-    }
-
-    public void setPromoName(String promoName) {
-        this.promoName = promoName;
-    }
-
-    public DateTime getStartDate() {
-        return this.startDate;
-    }
-
-    public void setStartDate(DateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public Integer getItemId() {
-        return this.itemId;
-    }
-
-    public void setItemId(Integer itemId) {
-        this.itemId = itemId;
-    }
-
-    public BigDecimal getPromoItemPrice() {
-        return this.promoItemPrice;
-    }
-
-    public void setPromoItemPrice(BigDecimal promoItemPrice) {
-        this.promoItemPrice = promoItemPrice;
-    }
-
-    public DateTime getEndDate() {
-        return this.endDate;
-    }
-
-    public void setEndDate(DateTime endDate) {
-        this.endDate = endDate;
-    }
-
-    public Integer getStatus() {
-        return this.status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 }

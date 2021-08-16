@@ -7,10 +7,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import lombok.Data;
+
 /**
  * @author zett0n
  * @date 2021/8/8 15:28
  */
+@Data
 public class UserModel implements Serializable {
     private Integer id;
 
@@ -34,68 +37,4 @@ public class UserModel implements Serializable {
 
     @NotBlank(message = "密码不能为空")
     private String encryptedPassword;
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Byte getGender() {
-        return this.gender;
-    }
-
-    public void setGender(Byte gender) {
-        this.gender = gender;
-    }
-
-    public Integer getAge() {
-        return this.age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public String getTelephone() {
-        return this.telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getRegisterMode() {
-        return this.registerMode;
-    }
-
-    public void setRegisterMode(String registerMode) {
-        this.registerMode = registerMode;
-    }
-
-    public String getThirdPartyId() {
-        return this.thirdPartyId;
-    }
-
-    public void setThirdPartyId(String thirdPartyId) {
-        this.thirdPartyId = thirdPartyId;
-    }
-
-    public String getEncryptedPassword() {
-        return this.encryptedPassword;
-    }
-
-    public void setEncryptedPassword(String encryptPassword) {
-        this.encryptedPassword = encryptPassword;
-    }
 }
