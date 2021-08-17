@@ -2,10 +2,12 @@ package cn.edu.zjut.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import cn.edu.zjut.entity.ItemInfo;
 import cn.edu.zjut.entity.ItemStock;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
+import cn.edu.zjut.mq.MQProducer;
 import cn.edu.zjut.service.ItemService;
 import cn.edu.zjut.service.PromoService;
 import cn.edu.zjut.service.model.ItemModel;
@@ -40,6 +43,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private PromoService promoService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private MQProducer mqProducer;
 
     private ItemInfo convertInfoFromModel(ItemModel itemModel) {
         if (itemModel == null) {
@@ -128,17 +137,38 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public boolean decreaseStock(Integer itemId, Integer amount) throws BusinessException {
-        int affectedRow = this.itemStockMapper.decreaseStock(itemId, amount);
-        if (affectedRow > 0) {
-            return true;
-        } else {
+        // int leftItemStock = this.itemStockMapper.decreaseStock(itemId, amount);
+        Long leftItemStock = this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount * (-1L));
+
+        // reids更新库存失败
+        if (leftItemStock < 0) {
+            this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
             return false;
         }
+        // reids更新库存成功
+        boolean mqResult = this.mqProducer.asyncReduceStock(itemId, amount);
+        if (!mqResult) {
+            // mq结果失败，回补redis
+            this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
+            return false;
+        }
+        return true;
     }
 
     @Override
     @Transactional
     public void increaseSales(Integer itemId, Integer amount) throws BusinessException {
         this.itemInfoMapper.increaseSales(itemId, amount);
+    }
+
+    @Override
+    public ItemModel getItemByIdInCache(Integer id) {
+        ItemModel itemModel = (ItemModel)this.redisTemplate.opsForValue().get("item_validate_" + id);
+        if (itemModel == null) {
+            itemModel = this.getItemById(id);
+            this.redisTemplate.opsForValue().set("item_validate_" + id, itemModel);
+            this.redisTemplate.expire("item_validate_" + id, 10, TimeUnit.MINUTES);
+        }
+        return itemModel;
     }
 }

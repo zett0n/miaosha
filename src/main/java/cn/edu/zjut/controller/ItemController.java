@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import cn.edu.zjut.controller.vo.ItemVO;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.response.CommonReturnType;
+import cn.edu.zjut.service.CacheService;
 import cn.edu.zjut.service.ItemService;
+import cn.edu.zjut.service.PromoService;
 import cn.edu.zjut.service.model.ItemModel;
 
 /**
@@ -31,6 +33,12 @@ public class ItemController extends BaseController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private PromoService promoService;
 
     @PostMapping("/create")
     public CommonReturnType createItem(@RequestParam(name = "title") String title,
@@ -53,12 +61,19 @@ public class ItemController extends BaseController {
 
     @GetMapping("/get")
     public CommonReturnType getItem(@RequestParam(name = "id") Integer id) {
-        // 查询redis缓存
-        ItemModel itemModel = (ItemModel)this.redisTemplate.opsForValue().get("item_" + id);
+        ItemModel itemModel;
+        // 查询本地热点缓存
+        itemModel = (ItemModel)this.cacheService.getFromCommonCache("item_" + id);
         if (itemModel == null) {
-            itemModel = this.itemService.getItemById(id);
-            this.redisTemplate.opsForValue().set("item_" + id, itemModel);
-            this.redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
+            // 查询redis缓存
+            itemModel = (ItemModel)this.redisTemplate.opsForValue().get("item_" + id);
+            if (itemModel == null) {
+                // 查询数据库
+                itemModel = this.itemService.getItemById(id);
+                this.redisTemplate.opsForValue().set("item_" + id, itemModel);
+                this.redisTemplate.expire("item_" + id, 10, TimeUnit.MINUTES);
+            }
+            this.cacheService.setCommonCache("item_" + id, itemModel);
         }
         ItemVO itemVO = convertVOFromModel(itemModel);
         return CommonReturnType.create(itemVO);
@@ -89,5 +104,11 @@ public class ItemController extends BaseController {
             itemVO.setPromoStatus(0);
         }
         return itemVO;
+    }
+
+    @GetMapping("/publishPromo")
+    public CommonReturnType publishPromo(@RequestParam(name = "id") Integer promoId) {
+        this.promoService.publishPromo(promoId);
+        return CommonReturnType.create(null);
     }
 }

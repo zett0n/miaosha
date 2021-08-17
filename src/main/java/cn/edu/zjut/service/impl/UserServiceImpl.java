@@ -1,9 +1,12 @@
 package cn.edu.zjut.service.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ValidatorImpl validator;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     private UserModel convertModelFromUser(UserInfo userInfo, UserPassword userPassword) {
         if (userInfo == null || userPassword == null) {
@@ -111,6 +117,17 @@ public class UserServiceImpl implements UserService {
 
         if (!StringUtils.equals(encryptedPassword, userModel.getEncryptedPassword())) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
+        }
+        return userModel;
+    }
+
+    @Override
+    public UserModel getUserByIdInCache(Integer id) {
+        UserModel userModel = (UserModel)this.redisTemplate.opsForValue().get("user_validate_" + id);
+        if (userModel == null) {
+            userModel = this.getUserById(id);
+            this.redisTemplate.opsForValue().set("user_validate_" + id, userModel);
+            this.redisTemplate.expire("user_validate_" + id, 10, TimeUnit.MINUTES);
         }
         return userModel;
     }

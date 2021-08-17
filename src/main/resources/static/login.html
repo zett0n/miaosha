@@ -65,7 +65,7 @@
                 xhrFields: {withCredentials: true},
                 success: function (data) {
                     if (data.status == "success") {
-                        alert("登录成功");
+                        // alert("登录成功");
                         var token = data.data;
                         window.localStorage["token"] = token;
                         window.location.href = "listitem.html";

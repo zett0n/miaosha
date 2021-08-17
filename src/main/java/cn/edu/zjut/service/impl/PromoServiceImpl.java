@@ -5,11 +5,14 @@ import java.math.BigDecimal;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import cn.edu.zjut.dao.PromoInfoMapper;
 import cn.edu.zjut.entity.PromoInfo;
+import cn.edu.zjut.service.ItemService;
 import cn.edu.zjut.service.PromoService;
+import cn.edu.zjut.service.model.ItemModel;
 import cn.edu.zjut.service.model.PromoModel;
 
 /**
@@ -18,8 +21,15 @@ import cn.edu.zjut.service.model.PromoModel;
  */
 @Service
 public class PromoServiceImpl implements PromoService {
+
     @Autowired
     private PromoInfoMapper promoInfoMapper;
+
+    @Autowired
+    private ItemService itemService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public PromoModel getPromoByItemId(Integer itemId) {
@@ -40,6 +50,17 @@ public class PromoServiceImpl implements PromoService {
             promoModel.setStatus(2);
         }
         return promoModel;
+    }
+
+    @Override
+    public void publishPromo(Integer promoId) {
+        // 通过活动id获取活动
+        PromoInfo promoInfo = this.promoInfoMapper.selectByPrimaryKey(promoId);
+        Integer itemId = promoInfo.getItemId();
+        if (itemId != null && itemId != 0) {
+            ItemModel itemModel = this.itemService.getItemById(itemId);
+            this.redisTemplate.opsForValue().set("promo_item_stock_" + itemModel.getId(), itemModel.getStock());
+        }
     }
 
     private PromoModel convertModelFromInfo(PromoInfo promoInfo) {
