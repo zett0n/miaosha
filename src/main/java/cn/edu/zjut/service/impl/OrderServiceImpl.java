@@ -24,7 +24,6 @@ import cn.edu.zjut.service.UserService;
 import cn.edu.zjut.service.model.ItemModel;
 import cn.edu.zjut.service.model.OrderModel;
 import cn.edu.zjut.service.model.PromoModel;
-import cn.edu.zjut.service.model.UserModel;
 
 /**
  * @author zett0n
@@ -96,15 +95,16 @@ public class OrderServiceImpl implements OrderService {
         // 下单的商品是否存在
         // ItemModel itemModel = this.itemService.getItemById(itemId);
         ItemModel itemModel = this.itemService.getItemByIdInCache(itemId);
-        if (itemModel == null) {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品信息不存在");
-        }
+        // if (itemModel == null) {
+        // throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "商品信息不存在");
+        // }
+
         // 用户是否合法
         // UserModel userModel = this.userService.getUserById(userId);
-        UserModel userModel = this.userService.getUserByIdInCache(userId);
-        if (userModel == null) {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "用户信息不存在");
-        }
+        // UserModel userModel = this.userService.getUserByIdInCache(userId);
+        // if (userModel == null) {
+        // throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "用户信息不存在");
+        // }
         // 购买数量是否正确
         if (amount <= 0 || amount > 99) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "购买数量不正确");
@@ -112,16 +112,16 @@ public class OrderServiceImpl implements OrderService {
 
         // 2.检验秒杀活动信息
         PromoModel promoModel = itemModel.getPromoModel();
-        if (promoId != null) {
-            // 秒杀活动是否存在对应商品
-            if (promoId.intValue() != promoModel.getId()) {
-                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "秒杀信息不正确");
-            }
-            // 检验秒杀是否正在进行
-            if (promoModel.getStatus() != 2) {
-                throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "秒杀未进行中");
-            }
-        }
+        // if (promoId != null) {
+        // // 秒杀活动是否存在对应商品
+        // if (promoId.intValue() != promoModel.getId()) {
+        // throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "秒杀信息不正确");
+        // }
+        // // 检验秒杀是否正在进行
+        // if (promoModel.getStatus() != 2) {
+        // throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "秒杀未进行中");
+        // }
+        // }
 
         // 3.落单减库存
         boolean result = this.itemService.decreaseStock(itemId, amount);

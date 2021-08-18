@@ -14,36 +14,34 @@
         <div id="promoStartDateContainer" class="form-group">
             <label style="color:blue" id="promoStatus" class="control-label">秒杀开始时间</label>
             <div>
-                <label style="color:red" class="control-label"
-                       id="promoStartDate"/>
+                <label style="color:red" class="control-label" id="promoStartDate" />
             </div>
         </div>
 
         <div class="form-group">
             <div>
-                <label class="control-label" id="title"/>
+                <label class="control-label" id="title" />
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">商品描述</label>
             <div>
-                <label class="control-label" id="description"/>
+                <label class="control-label" id="description" />
             </div>
         </div>
 
         <div id="normalPriceContainer" class="form-group">
             <label class="control-label">价格</label>
             <div>
-                <label class="control-label" id="price"/>
+                <label class="control-label" id="price" />
             </div>
         </div>
 
         <div id="promoPriceContainer" class="form-group">
             <label style="color:red" class="control-label">秒杀价格</label>
             <div>
-                <label style="color: red" class="control-label"
-                       id="promoPrice"/>
+                <label style="color: red" class="control-label" id="promoPrice" />
             </div>
         </div>
 
@@ -56,14 +54,14 @@
         <div class="form-group">
             <label class="control-label">库存</label>
             <div>
-                <label class="control-label" id="stock"/>
+                <label class="control-label" id="stock" />
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">销量</label>
             <div>
-                <label class="control-label" id="sales"/>
+                <label class="control-label" id="sales" />
             </div>
         </div>
 
@@ -90,39 +88,90 @@
 
     jQuery(document).ready(function () {
         $("#createorder").on("click", function () {
-            var token = window.localStorage["token"];
-            if (token == null) {
+            var loginToken = window.localStorage["loginToken"];
+            if (loginToken == null) {
                 alert("没有登录，不能下单");
                 window.location.href = "login.html";
                 return false;
             }
             $.ajax({
                 type: "POST",
-                url: "http://" + g_host + "/order/create?token=" + token,
+                url: "http://" + g_host + "/order/generatePromoToken?loginToken=" + loginToken,
                 data: {
                     "itemId": global_itemVO.id,
-                    "amount": 1,
                     "promoId": global_itemVO.promoId
                 },
                 contentType: "application/x-www-form-urlencoded",
-                xhrFields: {withCredentials: true},
+                xhrFields: { withCredentials: true },
                 success: function (data) {
                     if (data.status == "success") {
-                        alert("下单成功!")
-                        window.location.reload();
+                        var promoToken = data.data;
+                        $.ajax({
+                            type: "POST",
+                            url: "http://" + g_host + "/order/create?loginToken=" + loginToken,
+                            data: {
+                                "itemId": global_itemVO.id,
+                                "amount": 1,
+                                "promoId": global_itemVO.promoId,
+                                "promoToken": promoToken
+                            },
+                            contentType: "application/x-www-form-urlencoded",
+                            xhrFields: { withCredentials: true },
+                            success: function (data) {
+                                if (data.status == "success") {
+                                    alert("下单成功!")
+                                    window.location.reload();
+                                } else {
+                                    alert("下单失败，原因为" + data.data.errMsg);
+                                    if (data.data.errCode == 20003) {
+                                        window.location.href = "login.html";
+                                    }
+                                }
+                            },
+                            error: function (data) {
+                                alert("下单失败，原因为" + data.data.errMsg)
+                            }
+                        });
                     } else {
-                        alert("下单失败，原因为" + data.data.errMsg);
+                        alert("获取秒杀令牌失败，原因为" + data.data.errMsg);
                         if (data.data.errCode == 20003) {
                             window.location.href = "login.html";
                         }
                     }
                 },
                 error: function (data) {
-                    alert("下单失败，原因为" + data.data.errMsg)
+                    alert("获取秒杀令牌失败，原因为" + data.data.errMsg)
                 }
             });
-        });
 
+
+            // $.ajax({
+            //     type: "POST",
+            //     url: "http://" + g_host + "/order/create?loginToken=" + loginToken,
+            //     data: {
+            //         "itemId": global_itemVO.id,
+            //         "amount": 1,
+            //         "promoId": global_itemVO.promoId
+            //     },
+            //     contentType: "application/x-www-form-urlencoded",
+            //     xhrFields: {withCredentials: true},
+            //     success: function (data) {
+            //         if (data.status == "success") {
+            //             alert("下单成功!")
+            //             window.location.reload();
+            //         } else {
+            //             alert("下单失败，原因为" + data.data.errMsg);
+            //             if (data.data.errCode == 20003) {
+            //                 window.location.href = "login.html";
+            //             }
+            //         }
+            //     },
+            //     error: function (data) {
+            //         alert("下单失败，原因为" + data.data.errMsg)
+            //     }
+            // });
+
+        });
 
         $.ajax({
             type: "GET",
@@ -130,7 +179,7 @@
             data: {
                 "id": getParam("id"),
             },
-            xhrFields: {withCredentials: true},
+            xhrFields: { withCredentials: true },
             success: function (data) {
                 if (data.status == "success") {
                     global_itemVO = data.data;

@@ -3,7 +3,6 @@ package cn.edu.zjut.controller;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpSession;
@@ -123,19 +122,17 @@ public class UserController extends BaseController {
         UserModel userModel = this.userService.validateLogin(telephone, EncodeByMd5(password));
 
         // 若用户登录成功后将对应的登录信息和凭证存入redis
-        // 用UUID生成token
-        String uuidToken = UUID.randomUUID().toString();
-        uuidToken = uuidToken.replace("-", "");
+        String loginToken = "login_token_" + userModel.getId();
 
         // 建立token和用户登录状态的关系
-        this.redisTemplate.opsForValue().set(uuidToken, userModel);
-        this.redisTemplate.expire(uuidToken, 1, TimeUnit.HOURS);
+        this.redisTemplate.opsForValue().set(loginToken, userModel);
+        this.redisTemplate.expire(loginToken, 1, TimeUnit.HOURS);
 
         // 基于session的登录
         // this.httpSession.setAttribute("IS_LOGIN", true);
         // this.httpSession.setAttribute("LOGIN_USER", userModel);
 
         // 下发了token
-        return CommonReturnType.create(uuidToken);
+        return CommonReturnType.create(loginToken);
     }
 }

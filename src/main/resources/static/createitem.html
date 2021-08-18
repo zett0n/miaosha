@@ -13,35 +13,40 @@
         <div class="form-group">
             <label class="control-label">商品名</label>
             <div>
-                <input class="form-control" type="text" placeholder="商品名" name="title" id="title" />
+                <input class="form-control" type="text" placeholder="商品名"
+                       name="title" id="title"/>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">商品描述</label>
             <div>
-                <input class="form-control" type="text" placeholder="商品描述" name="description" id="description" />
+                <input class="form-control" type="text" placeholder="商品描述"
+                       name="description" id="description"/>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">价格</label>
             <div>
-                <input class="form-control" type="text" placeholder="商品价格" name="price" id="price" />
+                <input class="form-control" type="text" placeholder="商品价格"
+                       name="price" id="price"/>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">图片</label>
             <div>
-                <input class="form-control" type="text" placeholder="商品图片" name="imgUrl" id="imgUrl" />
+                <input class="form-control" type="text" placeholder="商品图片"
+                       name="imgUrl" id="imgUrl"/>
             </div>
         </div>
 
         <div class="form-group">
             <label class="control-label">库存</label>
             <div>
-                <input class="form-control" type="text" placeholder="商品库存" name="stock" id="stock" />
+                <input class="form-control" type="text" placeholder="商品库存"
+                       name="stock" id="stock"/>
             </div>
         </div>
 
@@ -93,10 +98,11 @@
                     "price": price,
                     "stock": stock
                 },
-                xhrFields: { withCredentials: true },
+                xhrFields: {withCredentials: true},
                 success: function (data) {
                     if (data.status == "success") {
                         alert("创建成功");
+                        window.location.reload();
                     } else {
                         alert("创建失败，原因为" + data.data.errMsg);
                     }
