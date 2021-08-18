@@ -135,6 +135,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public boolean asyncDecreaseStock(Integer itemId, Integer amount) {
+        return this.mqProducer.asyncReduceStock(itemId, amount);
+    }
+
+    @Override
+    public boolean increaseStock(Integer itemId, Integer amount) {
+        this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
+        return true;
+    }
+
+    @Override
     @Transactional
     public boolean decreaseStock(Integer itemId, Integer amount) throws BusinessException {
         // int leftItemStock = this.itemStockMapper.decreaseStock(itemId, amount);
@@ -142,16 +153,10 @@ public class ItemServiceImpl implements ItemService {
 
         // reids更新库存失败
         if (leftItemStock < 0) {
-            this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
+            this.increaseStock(itemId, amount);
             return false;
         }
         // reids更新库存成功
-        boolean mqResult = this.mqProducer.asyncReduceStock(itemId, amount);
-        if (!mqResult) {
-            // mq结果失败，回补redis
-            this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
-            return false;
-        }
         return true;
     }
 

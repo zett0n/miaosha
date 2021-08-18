@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
+import cn.edu.zjut.mq.MQProducer;
 import cn.edu.zjut.response.CommonReturnType;
 import cn.edu.zjut.service.OrderService;
 import cn.edu.zjut.service.model.UserModel;
@@ -30,6 +31,9 @@ public class OrderController extends BaseController {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private MQProducer mqProducer;
+
     // 封装下单请求
     @PostMapping("/create")
     public CommonReturnType createOrder(@RequestParam(name = "itemId") Integer itemId,
@@ -37,7 +41,7 @@ public class OrderController extends BaseController {
         @RequestParam(name = "amount") Integer amount, @RequestParam(name = "token") String token)
         throws BusinessException {
 
-        // 获取用户的登录信息
+        // [获取用户的登录信息]
         // 基于session
         // Boolean isLogin = (Boolean)this.httpSession.getAttribute("IS_LOGIN");
         // if (isLogin == null || !isLogin) {
@@ -51,7 +55,12 @@ public class OrderController extends BaseController {
             || null == (userModel = (UserModel)this.redisTemplate.opsForValue().get(token))) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
         }
-        this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
+
+        // this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
+        if (!this.mqProducer.transactionAsyncReduceStock(userModel.getId(), itemId, amount, promoId)) {
+            throw new BusinessException(EmBusinessError.UNKNOWN_ERROR, "下单失败");
+        }
+
         return CommonReturnType.create(null);
     }
 }

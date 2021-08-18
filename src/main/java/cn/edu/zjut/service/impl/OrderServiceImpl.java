@@ -42,6 +42,47 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private SequenceInfoMapper sequenceInfoMapper;
 
+    private OrderInfo convertInfoFromModel(OrderModel orderModel) {
+        if (orderModel == null) {
+            return null;
+        }
+        OrderInfo orderInfo = new OrderInfo();
+        BeanUtils.copyProperties(orderModel, orderInfo);
+        orderInfo.setItemPrice(orderModel.getItemPrice().doubleValue());
+        orderInfo.setOrderPrice(orderModel.getOrderPrice().doubleValue());
+        return orderInfo;
+    }
+
+    // 无论代码是否在事务中，都会开启新事务并在执行完后提交
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String generateOrderId() {
+        // 16位
+        // 8位时间（年月日）
+        StringBuilder sb = new StringBuilder();
+
+        LocalDateTime now = LocalDateTime.now();
+        String nowDate = now.format(DateTimeFormatter.ISO_DATE).replace("-", "");
+        sb.append(nowDate);
+
+        // 中间6位自增序列
+        SequenceInfo sequenceInfo = this.sequenceInfoMapper.getSequenceByName("order_info");
+        Integer currentValue = sequenceInfo.getCurrentValue();
+
+        sequenceInfo.setCurrentValue(sequenceInfo.getCurrentValue() + sequenceInfo.getStep());
+        this.sequenceInfoMapper.updateByPrimaryKeySelective(sequenceInfo);
+
+        String sequenceStr = String.valueOf(currentValue);
+        for (int i = 0; i < 6 - sequenceStr.length(); i++) {
+            sb.append(0);
+        }
+        sb.append(sequenceStr);
+
+        // 最后2位分库分表位
+        sb.append("00");
+
+        return sb.toString();
+    }
+
     @Override
     @Transactional
     public OrderModel createOrder(Integer userId, Integer itemId, Integer amount, Integer promoId)
@@ -105,48 +146,21 @@ public class OrderServiceImpl implements OrderService {
         // 6.增加商品销量
         this.itemService.increaseSales(itemId, amount);
 
-        // 7.返回前端
+        // 7.异步更新库存
+        // TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+        // @Override
+        // public void afterCommit() {
+        // boolean mqResult = OrderServiceImpl.this.itemService.asyncDecreaseStock(itemId, amount);
+        // if (!mqResult) {
+        // // mq结果失败，回补redis
+        // OrderServiceImpl.this.itemService.increaseStock(itemId, amount);
+        // throw new BusinessException(EmBusinessError.MQ_SEND_FAIL);
+        // }
+        // }
+        // });
+
+        // 8.返回前端
         return orderModel;
     }
 
-    private OrderInfo convertInfoFromModel(OrderModel orderModel) {
-        if (orderModel == null) {
-            return null;
-        }
-        OrderInfo orderInfo = new OrderInfo();
-        BeanUtils.copyProperties(orderModel, orderInfo);
-        orderInfo.setItemPrice(orderModel.getItemPrice().doubleValue());
-        orderInfo.setOrderPrice(orderModel.getOrderPrice().doubleValue());
-        return orderInfo;
-    }
-
-    // 无论代码是否在事务中，都会开启新事务并在执行完后提交
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String generateOrderId() {
-        // 16位
-        // 8位时间（年月日）
-        StringBuilder sb = new StringBuilder();
-
-        LocalDateTime now = LocalDateTime.now();
-        String nowDate = now.format(DateTimeFormatter.ISO_DATE).replace("-", "");
-        sb.append(nowDate);
-
-        // 中间6位自增序列
-        SequenceInfo sequenceInfo = this.sequenceInfoMapper.getSequenceByName("order_info");
-        Integer currentValue = sequenceInfo.getCurrentValue();
-
-        sequenceInfo.setCurrentValue(sequenceInfo.getCurrentValue() + sequenceInfo.getStep());
-        this.sequenceInfoMapper.updateByPrimaryKeySelective(sequenceInfo);
-
-        String sequenceStr = String.valueOf(currentValue);
-        for (int i = 0; i < 6 - sequenceStr.length(); i++) {
-            sb.append(0);
-        }
-        sb.append(sequenceStr);
-
-        // 最后2位分库分表位
-        sb.append("00");
-
-        return sb.toString();
-    }
 }

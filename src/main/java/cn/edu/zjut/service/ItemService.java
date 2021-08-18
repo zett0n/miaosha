@@ -22,4 +22,10 @@ public interface ItemService {
 
     // itemModel promoModel缓存模型
     ItemModel getItemByIdInCache(Integer id);
+
+    // 异步更新库存
+    boolean asyncDecreaseStock(Integer itemId, Integer amount);
+
+    // redis库存回补
+    boolean increaseStock(Integer itemId, Integer amount);
 }
