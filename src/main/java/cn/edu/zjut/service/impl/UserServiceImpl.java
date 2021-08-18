@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.edu.zjut.dao.UserInfoMapper;
 import cn.edu.zjut.dao.UserPasswordMapper;
 import cn.edu.zjut.entity.UserInfo;
-import cn.edu.zjut.entity.UserPassword;
+import cn.edu.zjut.entity.UserPasswordInfo;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.service.UserService;
@@ -39,13 +39,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    private UserModel convertModelFromUser(UserInfo userInfo, UserPassword userPassword) {
-        if (userInfo == null || userPassword == null) {
+    private UserModel convertModelFromUser(UserInfo userInfo, UserPasswordInfo userPasswordInfo) {
+        if (userInfo == null || userPasswordInfo == null) {
             return null;
         }
         UserModel userModel = new UserModel();
         BeanUtils.copyProperties(userInfo, userModel);
-        userModel.setEncryptedPassword(userPassword.getEncryptPassword());
+        userModel.setEncryptedPassword(userPasswordInfo.getEncryptPassword());
 
         return userModel;
     }
@@ -59,14 +59,14 @@ public class UserServiceImpl implements UserService {
         return userInfo;
     }
 
-    private UserPassword convertPasswordFromModel(UserModel userModel) {
+    private UserPasswordInfo convertPasswordFromModel(UserModel userModel) {
         if (userModel == null) {
             return null;
         }
-        UserPassword userPassword = new UserPassword();
-        userPassword.setEncryptPassword(userModel.getEncryptedPassword());
-        userPassword.setUserId(userModel.getId());
-        return userPassword;
+        UserPasswordInfo userPasswordInfo = new UserPasswordInfo();
+        userPasswordInfo.setEncryptPassword(userModel.getEncryptedPassword());
+        userPasswordInfo.setUserId(userModel.getId());
+        return userPasswordInfo;
     }
 
     @Override
@@ -75,8 +75,8 @@ public class UserServiceImpl implements UserService {
         if (userInfo == null) {
             return null;
         }
-        UserPassword userPassword = this.userPasswordMapper.selectByUserId(id);
-        return convertModelFromUser(userInfo, userPassword);
+        UserPasswordInfo userPasswordInfo = this.userPasswordMapper.selectByUserId(id);
+        return convertModelFromUser(userInfo, userPasswordInfo);
     }
 
     @Override
@@ -101,8 +101,8 @@ public class UserServiceImpl implements UserService {
 
         userModel.setId(userInfo.getId());
 
-        UserPassword userPassword = convertPasswordFromModel(userModel);
-        this.userPasswordMapper.insertSelective(userPassword);
+        UserPasswordInfo userPasswordInfo = convertPasswordFromModel(userModel);
+        this.userPasswordMapper.insertSelective(userPasswordInfo);
     }
 
     @Override
@@ -112,8 +112,8 @@ public class UserServiceImpl implements UserService {
         if (userInfo == null) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
         }
-        UserPassword userPassword = this.userPasswordMapper.selectByUserId(userInfo.getId());
-        UserModel userModel = convertModelFromUser(userInfo, userPassword);
+        UserPasswordInfo userPasswordInfo = this.userPasswordMapper.selectByUserId(userInfo.getId());
+        UserModel userModel = convertModelFromUser(userInfo, userPasswordInfo);
 
         if (!StringUtils.equals(encryptedPassword, userModel.getEncryptedPassword())) {
             throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);

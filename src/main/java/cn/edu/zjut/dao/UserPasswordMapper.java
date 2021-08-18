@@ -2,21 +2,21 @@ package cn.edu.zjut.dao;
 
 import org.springframework.stereotype.Repository;
 
-import cn.edu.zjut.entity.UserPassword;
+import cn.edu.zjut.entity.UserPasswordInfo;
 
 @Repository
 public interface UserPasswordMapper {
     int deleteByPrimaryKey(Integer id);
 
-    int insert(UserPassword record);
+    int insert(UserPasswordInfo record);
 
-    int insertSelective(UserPassword record);
+    int insertSelective(UserPasswordInfo record);
 
-    UserPassword selectByPrimaryKey(Integer id);
+    UserPasswordInfo selectByPrimaryKey(Integer id);
 
-    UserPassword selectByUserId(Integer userId);
+    UserPasswordInfo selectByUserId(Integer userId);
 
-    int updateByPrimaryKeySelective(UserPassword record);
+    int updateByPrimaryKeySelective(UserPasswordInfo record);
 
-    int updateByPrimaryKey(UserPassword record);
+    int updateByPrimaryKey(UserPasswordInfo record);
 }

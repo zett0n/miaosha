@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.edu.zjut.dao.ItemInfoMapper;
 import cn.edu.zjut.dao.ItemStockMapper;
 import cn.edu.zjut.entity.ItemInfo;
-import cn.edu.zjut.entity.ItemStock;
+import cn.edu.zjut.entity.ItemStockInfo;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.mq.MQProducer;
@@ -62,24 +62,24 @@ public class ItemServiceImpl implements ItemService {
         return itemInfo;
     }
 
-    private ItemStock convertStockFromModel(ItemModel itemModel) {
+    private ItemStockInfo convertStockFromModel(ItemModel itemModel) {
         if (itemModel == null) {
             return null;
         }
-        ItemStock itemStock = new ItemStock();
-        itemStock.setStock(itemModel.getStock());
-        itemStock.setItemId(itemModel.getId());
-        return itemStock;
+        ItemStockInfo itemStockInfo = new ItemStockInfo();
+        itemStockInfo.setStock(itemModel.getStock());
+        itemStockInfo.setItemId(itemModel.getId());
+        return itemStockInfo;
     }
 
-    private ItemModel convertModelFromItem(ItemInfo itemInfo, ItemStock itemStock) {
-        if (itemInfo == null || itemStock == null) {
+    private ItemModel convertModelFromItem(ItemInfo itemInfo, ItemStockInfo itemStockInfo) {
+        if (itemInfo == null || itemStockInfo == null) {
             return null;
         }
         ItemModel itemModel = new ItemModel();
         BeanUtils.copyProperties(itemInfo, itemModel);
         itemModel.setPrice(new BigDecimal(itemInfo.getPrice()));
-        itemModel.setStock(itemStock.getStock());
+        itemModel.setStock(itemStockInfo.getStock());
         return itemModel;
     }
 
@@ -97,8 +97,8 @@ public class ItemServiceImpl implements ItemService {
         this.itemInfoMapper.insertSelective(itemInfo);
         itemModel.setId(itemInfo.getId());
 
-        ItemStock itemStock = convertStockFromModel(itemModel);
-        this.itemStockMapper.insertSelective(itemStock);
+        ItemStockInfo itemStockInfo = convertStockFromModel(itemModel);
+        this.itemStockMapper.insertSelective(itemStockInfo);
 
         return getItemById(itemModel.getId());
     }
@@ -109,8 +109,8 @@ public class ItemServiceImpl implements ItemService {
 
         // stream api
         List<ItemModel> itemModelList = itemInfoList.stream().map(itemInfo -> {
-            ItemStock itemStock = this.itemStockMapper.selectByItemId(itemInfo.getId());
-            return convertModelFromItem(itemInfo, itemStock);
+            ItemStockInfo itemStockInfo = this.itemStockMapper.selectByItemId(itemInfo.getId());
+            return convertModelFromItem(itemInfo, itemStockInfo);
         }).collect(Collectors.toList());
 
         return itemModelList;
@@ -122,8 +122,8 @@ public class ItemServiceImpl implements ItemService {
         if (itemInfo == null) {
             return null;
         }
-        ItemStock itemStock = this.itemStockMapper.selectByItemId(id);
-        ItemModel itemModel = convertModelFromItem(itemInfo, itemStock);
+        ItemStockInfo itemStockInfo = this.itemStockMapper.selectByItemId(id);
+        ItemModel itemModel = convertModelFromItem(itemInfo, itemStockInfo);
 
         // 获取秒杀相关信息
         PromoModel promoModel = this.promoService.getPromoByItemId(itemModel.getId());

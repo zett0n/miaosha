@@ -3,23 +3,23 @@ package cn.edu.zjut.dao;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import cn.edu.zjut.entity.ItemStock;
+import cn.edu.zjut.entity.ItemStockInfo;
 
 @Repository
 public interface ItemStockMapper {
     int deleteByPrimaryKey(Integer id);
 
-    int insert(ItemStock record);
+    int insert(ItemStockInfo record);
 
-    int insertSelective(ItemStock record);
+    int insertSelective(ItemStockInfo record);
 
-    ItemStock selectByPrimaryKey(Integer id);
+    ItemStockInfo selectByPrimaryKey(Integer id);
 
-    ItemStock selectByItemId(Integer itemId);
+    ItemStockInfo selectByItemId(Integer itemId);
 
-    int updateByPrimaryKeySelective(ItemStock record);
+    int updateByPrimaryKeySelective(ItemStockInfo record);
 
-    int updateByPrimaryKey(ItemStock record);
+    int updateByPrimaryKey(ItemStockInfo record);
 
     int decreaseStock(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
 }

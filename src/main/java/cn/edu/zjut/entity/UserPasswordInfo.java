@@ -3,7 +3,7 @@ package cn.edu.zjut.entity;
 import lombok.Data;
 
 @Data
-public class UserPassword {
+public class UserPasswordInfo {
     private Integer id;
 
     private String encryptPassword;

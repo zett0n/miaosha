@@ -84,7 +84,7 @@
         <!--    &lt;!&ndash;<property name="useActualColumnNames" value="false" />&ndash;&gt;-->
         <!--</table>-->
 
-        <!--<table schema="" tableName="user_password" domainObjectName="UserPassword"-->
+        <!--<table schema="" tableName="user_password" domainObjectName="UserPasswordInfo"-->
         <!--       enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
         <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
         <!--</table>-->
@@ -96,7 +96,7 @@
         <!--    &lt;!&ndash;<property name="useActualColumnNames" value="false" />&ndash;&gt;-->
         <!--</table>-->
 
-        <!--<table schema="" tableName="item_stock" domainObjectName="ItemStock"-->
+        <!--<table schema="" tableName="item_stock" domainObjectName="ItemStockInfo"-->
         <!--       enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"-->
         <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
         <!--</table>-->

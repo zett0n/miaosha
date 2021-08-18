@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.edu.zjut.dao.ItemStockMapper">
-    <resultMap id="BaseResultMap" type="cn.edu.zjut.entity.ItemStock">
+    <resultMap id="BaseResultMap" type="cn.edu.zjut.entity.ItemStockInfo">
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="stock" jdbcType="INTEGER" property="stock"/>
         <result column="item_id" jdbcType="INTEGER" property="itemId"/>
@@ -27,11 +27,12 @@
         from item_stock
         where id = #{id,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" parameterType="cn.edu.zjut.entity.ItemStock" keyProperty="id" useGeneratedKeys="true">
+    <insert id="insert" parameterType="cn.edu.zjut.entity.ItemStockInfo" keyProperty="id" useGeneratedKeys="true">
         insert into item_stock (id, stock, item_id)
         values (#{id,jdbcType=INTEGER}, #{stock,jdbcType=INTEGER}, #{itemId,jdbcType=INTEGER})
     </insert>
-    <insert id="insertSelective" parameterType="cn.edu.zjut.entity.ItemStock" keyProperty="id" useGeneratedKeys="true">
+    <insert id="insertSelective" parameterType="cn.edu.zjut.entity.ItemStockInfo" keyProperty="id"
+            useGeneratedKeys="true">
         insert into item_stock
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -56,7 +57,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="cn.edu.zjut.entity.ItemStock">
+    <update id="updateByPrimaryKeySelective" parameterType="cn.edu.zjut.entity.ItemStockInfo">
         update item_stock
         <set>
             <if test="stock != null">
@@ -76,7 +77,7 @@
           and stock >= #{amount}
     </update>
 
-    <update id="updateByPrimaryKey" parameterType="cn.edu.zjut.entity.ItemStock">
+    <update id="updateByPrimaryKey" parameterType="cn.edu.zjut.entity.ItemStockInfo">
         update item_stock
         set stock   = #{stock,jdbcType=INTEGER},
             item_id = #{itemId,jdbcType=INTEGER}
