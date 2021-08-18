@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 
+import cn.edu.zjut.dao.ItemStockLogInfoMapper;
+import cn.edu.zjut.entity.ItemStockLogInfo;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.service.OrderService;
 
@@ -39,6 +41,9 @@ public class MQProducer {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private ItemStockLogInfoMapper itemStockLogInfoMapper;
+
     // @PostConstruct 会在bean被初始化后调用
     // producer初始化
     @PostConstruct
@@ -56,12 +61,18 @@ public class MQProducer {
             public LocalTransactionState executeLocalTransaction(Message message, Object order) {
                 // 创建订单
                 Map orderMap = (Map)order;
+                String itemStockLogId = (String)orderMap.get("itemStockLogId");
                 try {
                     MQProducer.this.orderService.createOrder((Integer)orderMap.get("userId"),
                         (Integer)orderMap.get("itemId"), (Integer)orderMap.get("amount"),
-                        (Integer)orderMap.get("promoId"));
+                        (Integer)orderMap.get("promoId"), itemStockLogId);
                 } catch (BusinessException e) {
                     e.printStackTrace();
+                    // 设置对应的对应stockLog为回滚状态
+                    ItemStockLogInfo itemStockLogInfo =
+                        MQProducer.this.itemStockLogInfoMapper.selectByPrimaryKey(itemStockLogId);
+                    itemStockLogInfo.setStatus(3);
+                    MQProducer.this.itemStockLogInfoMapper.updateByPrimaryKeySelective(itemStockLogInfo);
                     return LocalTransactionState.ROLLBACK_MESSAGE;
                 }
                 return LocalTransactionState.COMMIT_MESSAGE;
@@ -74,7 +85,17 @@ public class MQProducer {
                 Map<String, Object> map = JSON.parseObject(jsonStr, Map.class);
                 Integer itemId = (Integer)map.get("itemId");
                 Integer amount = (Integer)map.get("amount");
-                return null;
+                String itemStockLogId = (String)map.get("itemStockLogId");
+
+                ItemStockLogInfo itemStockLogInfo =
+                    MQProducer.this.itemStockLogInfoMapper.selectByPrimaryKey(itemStockLogId);
+                if (itemStockLogInfo == null || itemStockLogInfo.getStatus() == 1) {
+                    return LocalTransactionState.UNKNOW;
+                }
+                if (itemStockLogInfo.getStatus() == 3) {
+                    return LocalTransactionState.ROLLBACK_MESSAGE;
+                }
+                return LocalTransactionState.COMMIT_MESSAGE;
             }
         });
     }
@@ -97,10 +118,12 @@ public class MQProducer {
     }
 
     // 事务型同步扣减消息
-    public boolean transactionAsyncReduceStock(Integer userId, Integer itemId, Integer amount, Integer promoId) {
+    public boolean transactionAsyncReduceStock(Integer userId, Integer itemId, Integer amount, Integer promoId,
+        String itemStockLogId) {
         Map<String, Object> bodyMap = new HashMap<>();
         bodyMap.put("itemId", itemId);
         bodyMap.put("amount", amount);
+        bodyMap.put("itemStockLogId", itemStockLogId);
         Message message =
             new Message(this.topicName, "increase", JSON.toJSON(bodyMap).toString().getBytes(StandardCharsets.UTF_8));
 
@@ -109,6 +132,7 @@ public class MQProducer {
         orderMap.put("itemId", itemId);
         orderMap.put("amount", amount);
         orderMap.put("promoId", promoId);
+        orderMap.put("itemStockLogId", itemStockLogId);
 
         TransactionSendResult transactionSendResult;
         try {

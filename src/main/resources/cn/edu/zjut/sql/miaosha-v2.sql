@@ -11,7 +11,7 @@
  Target Server Version : 50568
  File Encoding         : 65001
 
- Date: 18/08/2021 16:02:38
+ Date: 18/08/2021 18:10:11
 */
 
 SET NAMES utf8mb4;
@@ -29,15 +29,16 @@ CREATE TABLE `item_info` (
   `sales` int(11) NOT NULL DEFAULT '0',
   `img_url` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of item_info
 -- ----------------------------
 BEGIN;
 INSERT INTO `item_info` VALUES (2, 'iphone13', 8000, '秒杀进行中', 0, 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fww3.sinaimg.cn%2Fmw690%2F002HCNrbgy1gtex9esk8hj618g0p0dix02.jpg&refer=http%3A%2F%2Fwww.sina.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1631434931&t=f4de0f0d6ed039094150971b69678eaf');
-INSERT INTO `item_info` VALUES (3, '红薯', 5, '秒杀已结束 from ECS', 0, 'https://img1.baidu.com/it/u=3103435753,3987114076&fm=26&fmt=auto&gp=0.jpg');
-INSERT INTO `item_info` VALUES (4, '显卡', 4000, '未有秒杀活动', 0, 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2F2a.zol-img.com.cn%2Fproduct%2F10_400x300%2F470%2FcetpeL8gHcjU.jpg&refer=http%3A%2F%2F2a.zol-img.com.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1631865230&t=4d92d3662277e02e158df5b807367e3');
+INSERT INTO `item_info` VALUES (3, '红薯', 5, '秒杀进行中from ECS', 0, 'https://img1.baidu.com/it/u=3103435753,3987114076&fm=26&fmt=auto&gp=0.jpg');
+INSERT INTO `item_info` VALUES (4, '显卡', 4000, '秒杀活动进行中', 0, 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2F2a.zol-img.com.cn%2Fproduct%2F10_400x300%2F470%2FcetpeL8gHcjU.jpg&refer=http%3A%2F%2F2a.zol-img.com.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1631865230&t=4d92d3662277e02e158df5b807367e3');
+INSERT INTO `item_info` VALUES (5, '黑皮书', 100, '无秒杀活动', 0, 'https://img1.baidu.com/it/u=1481140384,618583755&fm=26&fmt=auto&gp=0.jpg');
 COMMIT;
 
 -- ----------------------------
@@ -50,15 +51,16 @@ CREATE TABLE `item_stock` (
   `item_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `item_id_index` (`item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of item_stock
 -- ----------------------------
 BEGIN;
-INSERT INTO `item_stock` VALUES (1, 800, 2);
-INSERT INTO `item_stock` VALUES (2, 1000, 3);
-INSERT INTO `item_stock` VALUES (3, 500, 4);
+INSERT INTO `item_stock` VALUES (1, 3, 2);
+INSERT INTO `item_stock` VALUES (2, 500, 3);
+INSERT INTO `item_stock` VALUES (3, 20, 4);
+INSERT INTO `item_stock` VALUES (4, 80, 5);
 COMMIT;
 
 -- ----------------------------
@@ -69,6 +71,7 @@ CREATE TABLE `item_stock_log` (
   `id` varchar(64) NOT NULL,
   `item_id` int(11) NOT NULL DEFAULT '0',
   `amount` int(11) NOT NULL DEFAULT '0',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '1：初始状态，2：表示下单扣减库存成功，3：下单回滚',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -111,14 +114,15 @@ CREATE TABLE `promo` (
   `item_id` int(11) NOT NULL DEFAULT '0',
   `promo_item_price` double NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of promo
 -- ----------------------------
 BEGIN;
-INSERT INTO `promo` VALUES (2, '红薯抢购', '2021-08-13 17:00:00', '2021-08-13 20:00:00', 3, 2);
+INSERT INTO `promo` VALUES (2, '红薯抢购', '2021-08-13 17:00:00', '2022-08-13 20:00:00', 3, 2);
 INSERT INTO `promo` VALUES (3, 'iphone秒杀', '2021-08-17 20:28:00', '2022-10-10 20:25:19', 2, 5000);
+INSERT INTO `promo` VALUES (4, '显卡秒杀', '2021-08-18 00:00:00', '2022-01-01 00:00:00', 4, 2000);
 COMMIT;
 
 -- ----------------------------

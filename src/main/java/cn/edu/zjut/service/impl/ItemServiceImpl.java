@@ -2,6 +2,7 @@ package cn.edu.zjut.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cn.edu.zjut.dao.ItemInfoMapper;
+import cn.edu.zjut.dao.ItemStockLogInfoMapper;
 import cn.edu.zjut.dao.ItemStockMapper;
 import cn.edu.zjut.entity.ItemInfo;
 import cn.edu.zjut.entity.ItemStockInfo;
+import cn.edu.zjut.entity.ItemStockLogInfo;
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.mq.MQProducer;
@@ -49,6 +52,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private MQProducer mqProducer;
+
+    @Autowired
+    private ItemStockLogInfoMapper itemStockLogInfoMapper;
 
     private ItemInfo convertInfoFromModel(ItemModel itemModel) {
         if (itemModel == null) {
@@ -135,14 +141,32 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public boolean asyncDecreaseStock(Integer itemId, Integer amount) {
         return this.mqProducer.asyncReduceStock(itemId, amount);
     }
 
     @Override
+    @Transactional
     public boolean increaseStock(Integer itemId, Integer amount) {
         this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount);
         return true;
+    }
+
+    // 初始化对应的库存流水
+    @Override
+    @Transactional
+    public String initStockLog(Integer itemId, Integer amount) {
+        ItemStockLogInfo itemStockLogInfo = new ItemStockLogInfo();
+
+        itemStockLogInfo.setId(UUID.randomUUID().toString().replace("-", ""));
+        itemStockLogInfo.setItemId(itemId);
+        itemStockLogInfo.setAmount(amount);
+        itemStockLogInfo.setStatus(1); // 1：初始状态，2：表示下单扣减库存成功，3：下单回滚
+
+        this.itemStockLogInfoMapper.insertSelective(itemStockLogInfo);
+
+        return itemStockLogInfo.getId();
     }
 
     @Override
@@ -151,12 +175,16 @@ public class ItemServiceImpl implements ItemService {
         // int leftItemStock = this.itemStockMapper.decreaseStock(itemId, amount);
         Long leftItemStock = this.redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount * (-1L));
 
-        // reids更新库存失败
+        // 库存量<0，reids更新库存失败
         if (leftItemStock < 0) {
             this.increaseStock(itemId, amount);
             return false;
         }
-        // reids更新库存成功
+        // 库存量=0，标识库存已售罄
+        if (leftItemStock == 0) {
+            this.redisTemplate.opsForValue().set("promo_item_stock_invalid_" + itemId, "true");
+        }
+        // 库存量>=0，reids更新库存成功
         return true;
     }
 

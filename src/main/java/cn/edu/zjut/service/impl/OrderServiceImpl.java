@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import cn.edu.zjut.dao.ItemStockLogInfoMapper;
 import cn.edu.zjut.dao.OrderInfoMapper;
 import cn.edu.zjut.dao.SequenceInfoMapper;
+import cn.edu.zjut.entity.ItemStockLogInfo;
 import cn.edu.zjut.entity.OrderInfo;
 import cn.edu.zjut.entity.SequenceInfo;
 import cn.edu.zjut.error.BusinessException;
@@ -41,6 +43,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private SequenceInfoMapper sequenceInfoMapper;
+
+    @Autowired
+    private ItemStockLogInfoMapper itemStockLogInfoMapper;
 
     private OrderInfo convertInfoFromModel(OrderModel orderModel) {
         if (orderModel == null) {
@@ -85,8 +90,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer amount, Integer promoId)
-        throws BusinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer amount, Integer promoId,
+        String itemStockLogId) throws BusinessException {
         // 1.检验下单状态
         // 下单的商品是否存在
         // ItemModel itemModel = this.itemService.getItemById(itemId);
@@ -159,8 +164,22 @@ public class OrderServiceImpl implements OrderService {
         // }
         // });
 
+        // 7.设置库存流水状态为成功
+        ItemStockLogInfo itemStockLogInfo = this.itemStockLogInfoMapper.selectByPrimaryKey(itemStockLogId);
+        if (itemStockLogInfo == null) {
+            throw new BusinessException(EmBusinessError.UNKNOWN_ERROR);
+        }
+        itemStockLogInfo.setStatus(2);
+        this.itemStockLogInfoMapper.updateByPrimaryKeySelective(itemStockLogInfo);
+
+        // 测试mq checkLocalTransaction
+        // try {
+        // Thread.sleep(20000);
+        // } catch (InterruptedException e) {
+        // e.printStackTrace();
+        // }
+
         // 8.返回前端
         return orderModel;
     }
-
 }

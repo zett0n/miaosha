@@ -11,6 +11,7 @@ import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.mq.MQProducer;
 import cn.edu.zjut.response.CommonReturnType;
+import cn.edu.zjut.service.ItemService;
 import cn.edu.zjut.service.OrderService;
 import cn.edu.zjut.service.model.UserModel;
 
@@ -33,6 +34,9 @@ public class OrderController extends BaseController {
 
     @Autowired
     private MQProducer mqProducer;
+
+    @Autowired
+    private ItemService itemService;
 
     // 封装下单请求
     @PostMapping("/create")
@@ -57,7 +61,17 @@ public class OrderController extends BaseController {
         }
 
         // this.orderService.createOrder(userModel.getId(), itemId, amount, promoId);
-        if (!this.mqProducer.transactionAsyncReduceStock(userModel.getId(), itemId, amount, promoId)) {
+
+        // 判断库存是否已售罄，售罄直接返回下单失败
+        if (Boolean.TRUE.equals(this.redisTemplate.hasKey("promo_item_stock_invalid_" + itemId))) {
+            throw new BusinessException(EmBusinessError.STOCK_NOT_ENOUGH);
+        }
+
+        // 加入库存流水init状态
+        String itemStockLogId = this.itemService.initStockLog(itemId, amount);
+
+        // 完成对应下单事务型消息机制
+        if (!this.mqProducer.transactionAsyncReduceStock(userModel.getId(), itemId, amount, promoId, itemStockLogId)) {
             throw new BusinessException(EmBusinessError.UNKNOWN_ERROR, "下单失败");
         }
 

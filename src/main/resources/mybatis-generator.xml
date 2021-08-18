@@ -116,5 +116,10 @@
         <!--       enableUpdateByExample="false" selectByExampleQueryId="false">-->
         <!--</table>-->
 
+        <table schema="" tableName="item_stock_log" domainObjectName="ItemStockLogInfo"
+               enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+               enableUpdateByExample="false" selectByExampleQueryId="false">
+        </table>
+
     </context>
 </generatorConfiguration>
