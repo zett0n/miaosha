@@ -57,7 +57,8 @@ public class OrderServiceImpl implements OrderService {
         return orderInfo;
     }
 
-    // 无论代码是否在事务中，都会开启新事务并在执行完后提交
+    // 每一笔订单都生成一个唯一的订单号，如果采用默认事务，那么事务失败发生回滚后新的订单会继续采用上一笔失败订单的订单号
+    // 所以需要单独提交事务，REQUIRES_NEW无论代码是否在事务中，都会开启新事务并在执行完后提交
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String generateOrderId() {
         // 16位

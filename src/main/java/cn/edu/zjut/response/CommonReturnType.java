@@ -5,17 +5,19 @@ package cn.edu.zjut.response;
  * @date 2021/8/8 15:58
  */
 public class CommonReturnType {
-    private Object data;
+    // success or fail
     private String status;
 
-    public CommonReturnType() {}
+    // 如果success，data内返回前端需要的JSON数据
+    // 如果fail，data内使用通用的错误码格式
+    private Object data;
 
-    public CommonReturnType(Object data) {
+    private CommonReturnType(Object data) {
         this.data = data;
         this.status = "success";
     }
 
-    public CommonReturnType(Object data, String status) {
+    private CommonReturnType(Object data, String status) {
         this.status = status;
         this.data = data;
     }
@@ -26,21 +28,5 @@ public class CommonReturnType {
 
     public static CommonReturnType create(Object data, String status) {
         return new CommonReturnType(data, status);
-    }
-
-    public String getStatus() {
-        return this.status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Object getData() {
-        return this.data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
     }
 }

@@ -71,6 +71,15 @@
             </button>
         </div>
 
+        <div id="verifyDiv" style="display: none;" class="form-actions">
+            <img src="" />
+            <input type="text" id="verifyContent" value="" />
+            <button class="btn blue" id="verifyBtn" type="submit">
+                验证
+            </button>
+        </div>
+
+        <input type="hidden" id="isInit" value="0" />
     </div>
 
 </body>
@@ -86,20 +95,52 @@
         return paramValue == "" && (paramValue = null), paramValue
     }
 
-    jQuery(document).ready(function () {
-        $("#createorder").on("click", function () {
-            var loginToken = window.localStorage["loginToken"];
-            if (loginToken == null) {
-                alert("没有登录，不能下单");
-                window.location.href = "login.html";
-                return false;
+    function hasInit() {
+        var isInit = $("#isInit").val();
+        return isInit;
+    }
+
+    function setHasInit() {
+        $("#isInit").val("1");
+    }
+
+    function initView() {
+        var isInit = hasInit();
+        if (isInit == "1") return;
+
+        $.ajax({
+            type: "GET",
+            url: "http://" + g_host + "/item/get",
+            data: {
+                "id": getParam("id"),
+            },
+            xhrFields: { withCredentials: true },
+            success: function (data) {
+                if (data.status == "success") {
+                    global_itemVO = data.data;
+                    reloadDom();
+                    setInterval(reloadDom, 1000);
+                } else {
+                    alert("获取信息失败，原因为" + data.data.errMsg);
+                }
+            },
+            error: function (data) {
+                alert("获取信息失败，原因为" + data.data.errMsg)
             }
+        });
+    }
+
+    jQuery(document).ready(function () {
+        $("#verifyBtn").on("click", function () {
+            var loginToken = window.localStorage["loginToken"];
+
             $.ajax({
                 type: "POST",
                 url: "http://" + g_host + "/order/generatePromoToken?loginToken=" + loginToken,
                 data: {
                     "itemId": global_itemVO.id,
-                    "promoId": global_itemVO.promoId
+                    "promoId": global_itemVO.promoId,
+                    "verifyCode": $("#verifyContent").val()
                 },
                 contentType: "application/x-www-form-urlencoded",
                 xhrFields: { withCredentials: true },
@@ -143,56 +184,19 @@
                     alert("获取秒杀令牌失败，原因为" + data.data.errMsg)
                 }
             });
-
-
-            // $.ajax({
-            //     type: "POST",
-            //     url: "http://" + g_host + "/order/create?loginToken=" + loginToken,
-            //     data: {
-            //         "itemId": global_itemVO.id,
-            //         "amount": 1,
-            //         "promoId": global_itemVO.promoId
-            //     },
-            //     contentType: "application/x-www-form-urlencoded",
-            //     xhrFields: {withCredentials: true},
-            //     success: function (data) {
-            //         if (data.status == "success") {
-            //             alert("下单成功!")
-            //             window.location.reload();
-            //         } else {
-            //             alert("下单失败，原因为" + data.data.errMsg);
-            //             if (data.data.errCode == 20003) {
-            //                 window.location.href = "login.html";
-            //             }
-            //         }
-            //     },
-            //     error: function (data) {
-            //         alert("下单失败，原因为" + data.data.errMsg)
-            //     }
-            // });
-
         });
 
-        $.ajax({
-            type: "GET",
-            url: "http://" + g_host + "/item/get",
-            data: {
-                "id": getParam("id"),
-            },
-            xhrFields: { withCredentials: true },
-            success: function (data) {
-                if (data.status == "success") {
-                    global_itemVO = data.data;
-                    reloadDom();
-                    setInterval(reloadDom, 1000);
-                } else {
-                    alert("获取信息失败，原因为" + data.data.errMsg);
-                }
-            },
-            error: function (data) {
-                alert("获取信息失败，原因为" + data.data.errMsg)
+        $("#createorder").on("click", function () {
+            var loginToken = window.localStorage["loginToken"];
+            if (loginToken == null) {
+                alert("没有登录，不能下单");
+                window.location.href = "login.html";
+                return false;
             }
+            $("#verifyDiv img").attr("src", "http://" + g_host + "/order/generateVerifyCode?loginToken=" + loginToken);
+            $("#verifyDiv").show();
         });
+        initView();
     });
 
     function reloadDom() {

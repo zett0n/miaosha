@@ -12,9 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import cn.edu.zjut.error.BusinessException;
@@ -22,14 +21,13 @@ import cn.edu.zjut.error.EmBusinessError;
 import cn.edu.zjut.response.CommonReturnType;
 
 // 面向Controller切面编程
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class) // 抛出异常被ExceptionHandler捕获后就进入下面的doError方法
-    @ResponseBody
     public CommonReturnType doError(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        ex.printStackTrace();
         Map<String, Object> responseData = new HashMap<>();
         if (ex instanceof BusinessException) {
+            ex.printStackTrace();
             BusinessException BusinessException = (BusinessException)ex;
             responseData.put("errCode", BusinessException.getErrCode());
             responseData.put("errMsg", BusinessException.getErrMsg());

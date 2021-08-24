@@ -1,14 +1,21 @@
 package cn.edu.zjut.controller;
 
+import java.awt.image.RenderedImage;
+import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.*;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import com.google.common.util.concurrent.RateLimiter;
 
 import cn.edu.zjut.error.BusinessException;
 import cn.edu.zjut.error.EmBusinessError;
@@ -18,6 +25,7 @@ import cn.edu.zjut.service.ItemService;
 import cn.edu.zjut.service.OrderService;
 import cn.edu.zjut.service.PromoService;
 import cn.edu.zjut.service.model.UserModel;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author zett0n
@@ -26,6 +34,7 @@ import cn.edu.zjut.service.model.UserModel;
 @RestController
 @RequestMapping("/order")
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
+@Slf4j
 public class OrderController extends BaseController {
     @Autowired
     private OrderService orderService;
@@ -47,9 +56,12 @@ public class OrderController extends BaseController {
 
     private ExecutorService executorService;
 
+    private RateLimiter orderCreateRateLimiter;
+
     @PostConstruct
     public void initExecutorService() {
         this.executorService = Executors.newFixedThreadPool(20);
+        this.orderCreateRateLimiter = RateLimiter.create(200);
     }
 
     // 封装下单请求
@@ -58,6 +70,11 @@ public class OrderController extends BaseController {
         @RequestParam(name = "promoId", required = false) Integer promoId,
         @RequestParam(name = "amount") Integer amount, @RequestParam(name = "loginToken") String loginToken,
         @RequestParam(name = "promoToken", required = false) String promoToken) throws BusinessException {
+
+        if (this.orderCreateRateLimiter.tryAcquire()) {
+            throw new BusinessException(EmBusinessError.RATE_LIMIT);
+        }
+
         // [获取用户的登录信息]
         // 基于session
         // Boolean isLogin = (Boolean)this.httpSession.getAttribute("IS_LOGIN");
@@ -114,17 +131,44 @@ public class OrderController extends BaseController {
         return CommonReturnType.create(null);
     }
 
+    // 生成验证码
+    @GetMapping("/generateVerifyCode")
+    public void generateVerifyCode(@RequestParam(name = "loginToken") String loginToken, HttpServletResponse response)
+        throws BusinessException, IOException {
+
+        // 验证用户登录（基于token）
+        UserModel userModel;
+        if (StringUtils.isEmpty(loginToken)
+            || null == (userModel = (UserModel)this.redisTemplate.opsForValue().get(loginToken))) {
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能生成验证码");
+        }
+
+        // 生成验证码
+        Map<String, Object> map = person.sa.util.VerifyCodeGenerator.generateCodeAndPic();
+        ImageIO.write((RenderedImage)map.get("codePic"), "jpeg", response.getOutputStream());
+        this.redisTemplate.opsForValue().set("verify_code_" + userModel.getId(), map.get("code"));
+        this.redisTemplate.expire("verify_code_" + userModel.getId(), 10, TimeUnit.MINUTES);
+        log.debug("id {} 用户的验证码为：{}", userModel.getId(), map.get("code"));
+    }
+
     // 生成秒杀令牌
     @PostMapping("/generatePromoToken")
     public CommonReturnType generatePromoToken(@RequestParam(name = "itemId") Integer itemId,
         @RequestParam(name = "promoId", required = true) Integer promoId,
-        @RequestParam(name = "loginToken") String loginToken) throws BusinessException {
-        // [获取用户的登录信息]
-        // 基于token
+        @RequestParam(name = "loginToken") String loginToken, @RequestParam(name = "verifyCode") String verifyCode)
+        throws BusinessException {
+
+        // 验证用户登录（基于token）
         UserModel userModel;
         if (StringUtils.isEmpty(loginToken)
             || null == (userModel = (UserModel)this.redisTemplate.opsForValue().get(loginToken))) {
             throw new BusinessException(EmBusinessError.USER_NOT_LOGIN, "用户还未登录，不能下单");
+        }
+
+        // 验证码检验
+        String verifyCodeInRedis = (String)this.redisTemplate.opsForValue().get("verify_code_" + userModel.getId());
+        if (StringUtils.isEmpty(verifyCodeInRedis) || !verifyCodeInRedis.equalsIgnoreCase(verifyCode)) {
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "验证码错误");
         }
 
         // 获取秒杀访问令牌

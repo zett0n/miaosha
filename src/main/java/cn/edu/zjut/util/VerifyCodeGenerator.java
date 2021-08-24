@@ -11,7 +11,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-public class CodeUtil {
+public class VerifyCodeGenerator {
     private static int width = 90;// 定义图片的width
     private static int height = 20;// 定义图片的height
     private static int codeCount = 4;// 定义图片上显示验证码的个数
@@ -88,7 +88,7 @@ public class CodeUtil {
     public static void main(String[] args) throws Exception {
         // 创建文件输出流对象
         OutputStream out = new FileOutputStream("/Users/zett0n/Downloads/" + System.currentTimeMillis() + ".jpg");
-        Map<String, Object> map = CodeUtil.generateCodeAndPic();
+        Map<String, Object> map = person.sa.util.VerifyCodeGenerator.generateCodeAndPic();
         ImageIO.write((RenderedImage)map.get("codePic"), "jpeg", out);
         System.out.println("验证码的值为：" + map.get("code"));
     }

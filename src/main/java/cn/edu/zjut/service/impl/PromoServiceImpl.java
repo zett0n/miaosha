@@ -70,7 +70,6 @@ public class PromoServiceImpl implements PromoService {
 
             // 设置秒杀令牌的上限
             this.redisTemplate.opsForValue().set("promo_token_num_" + promoId, 5 * itemModel.getStock());
-
         }
     }
 
